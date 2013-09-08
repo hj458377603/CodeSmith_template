@@ -1,0 +1,72 @@
+﻿<%-- 基本设置 --%>
+<%@ Template Language="C#" TargetLanguage="Text" %>
+
+<%-- 引用程序集 --%>
+<%@ Assembly Name="SchemaExplorer" %>
+<%@ Import Namespace="SchemaExplorer" %>
+
+<%-- 变量 --%>
+<%@ Property Name="NameSpace" Type="System.String" Description="命名空间" %>
+<%@ Property Name="ClassDescription" Type="System.String" Description="类描述信息" %>
+<%@ Property Name="Author" Type="System.String" Default="Jun" Description="作者" %>
+<%@ Property Name="SourceTable" Type="SchemaExplorer.TableSchema" Description="要访问的表名" %>
+
+<%-- 模板内容 --%>
+/****************************************
+** 文件名: <%=SourceTable %>.cs
+** 作者: <%=Author %>
+** 创建时间: <%= DateTime.Now.ToLocalTime() %>
+****************************************/
+
+using System;
+ 
+namespace <%=NameSpace %>
+{
+    /// <summary>
+    /// <%=ClassDescription %>
+    /// </summary>
+    public class <%=SourceTable.Name %>
+    {            
+        <%foreach(var item in SourceTable.Columns){ %>
+        <%="#region "+item.Name %>
+        <%="/// <summary>"%>
+        <%="/// "+item.Description %>
+        <%="/// </summary>"%>
+        <%=GetPropertyStr(item)%>
+        <%="{" %>
+            <%="set;" %>
+            <%="get;" %>
+        <%="}" %>
+        <%="#endregion\r\n" %>
+        <%} %>       
+    }
+}
+
+<%-- 内部函数 --%>
+<script runat="template">
+    public string GetPropertyStr(ColumnSchema column)
+    {        
+        switch(column.SystemType.ToString().Substring(7)){
+            case "Int32":
+            {
+                return "public int"+" "+column.Name;
+                break;
+            }
+            case "Boolean":
+            {
+                return "public bool"+" "+column.Name;
+                break;
+            }
+            case "DateTime":
+            {
+                return "public DateTime"+" "+column.Name;
+                break;
+            }
+            default :
+            {
+                return "public "+column.SystemType.ToString().Substring(7).ToLower() +" "+column.Name;
+            }
+        }
+    }
+</script>
+

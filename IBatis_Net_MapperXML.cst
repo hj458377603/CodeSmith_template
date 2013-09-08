@@ -1,0 +1,54 @@
+﻿<%-- 基本设置 --%>
+<%@ Template Language="C#" TargetLanguage="XML" %>
+
+<%-- 引用程序集 --%>
+<%@ Assembly Name="SchemaExplorer" %>
+<%@ Import Namespace="SchemaExplorer" %>
+
+<%-- 变量 --%>
+<%@ Property Name="NameSpace" Type="System.String" Description="命名空间" %>
+<%@ Property Name="Author" Type="System.String" Default="Jun" Description="作者" %>
+<%@ Property Name="SourceTable" Type="SchemaExplorer.TableSchema" Description="要访问的表名" %>
+
+<%-- 模板内容 --%>
+<!--
+** 文件名: <%=SourceTable %>.xml
+** 作者: <%=Author %>
+** 创建时间: <%= DateTime.Now.ToLocalTime() %>
+****************************************
+-->
+<?xml version="1.0" encoding="utf-8" ?>
+<sqlMap namespace="<%=SourceTable.Name%>" xmlns="http://ibatis.apache.org/mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<alias>
+    <!-- alias:取别名;assembly:表示类所在的文件;type:表示该类的完整的名称-->
+    <typeAlias alias="<%=SourceTable.Name%>"  type="<%=NameSpace%>.<%=SourceTable.Name%>" />
+  </alias>
+
+  <resultMaps>
+
+    <resultMap id="FullTable" class="<%=SourceTable.Name%>">
+      <!-- property：类中的属性名; column：数据库中的列名，可以起别名-->
+      <%foreach(var item in SourceTable.Columns) {%>      
+      <result property="<%=item.Name %>" column="<%=item.Name %>" dbType="<%=item.NativeType.ToString().ToUpper() %>"/>
+      <%} %>    
+    </resultMap>
+
+  </resultMaps>
+
+  <statements>
+  <%if(SourceTable.HasPrimaryKey&&SourceTable.PrimaryKey.MemberColumns.Count==1) {%>
+  
+    <select id="Student.SelectBy<%=SourceTable.Name%>" parameterClass="<%=SourceTable.PrimaryKey.MemberColumns[0].SystemType.ToString().Substring(7)%>" resultMap="FullTable">
+      Select * From <%=SourceTable.Name%>
+      Where <%=SourceTable.PrimaryKey.MemberColumns[0].Name%>=#<%=SourceTable.PrimaryKey.MemberColumns[0].Name%>#
+    </select>
+    <%} %>  
+  </statements>
+</sqlMap>
+
+
+<%-- 内部函数 --%>
+<script runat="template">
+
+</script>
+
